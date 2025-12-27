@@ -1,37 +1,29 @@
 from typing import List, Dict, Any, Optional
+from pydantic import BaseModel, ConfigDict, Field
 import litellm
 
 from .models import Message, Role
 
 
-class LLMClient:
+class LLMClient(BaseModel):
     """
     Client for managing LLM interactions via LiteLLM.
 
     Maintains conversation history and handles API calls to various LLM providers.
     """
 
-    def __init__(
-        self,
-        model: str,
-        temperature: float = 1.0,
-        max_tokens: Optional[int] = None,
-        **kwargs: Any
-    ):
-        """
-        Initialize the LLM client.
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra='allow')
 
-        Args:
-            model: Model identifier (e.g., "gpt-4", "claude-3-opus-20240229")
-            temperature: Sampling temperature (default: 1.0)
-            max_tokens: Maximum tokens to generate (default: None, uses model default)
-            **kwargs: Additional arguments to pass to litellm.completion()
-        """
-        self.model = model
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        self.additional_params = kwargs
-        self.messages: List[Dict[str, str]] = []
+    model: str
+    temperature: float = 1.0
+    max_tokens: Optional[int] = None
+    messages: List[Dict[str, str]] = Field(default_factory=list)
+
+    @property
+    def additional_params(self) -> Dict[str, Any]:
+        """Get additional parameters passed during initialization."""
+        # Pydantic stores extra fields in __pydantic_extra__
+        return self.__pydantic_extra__ if hasattr(self, '__pydantic_extra__') and self.__pydantic_extra__ else {}
 
     def add_message(self, role: Role, content: str) -> None:
         """
@@ -57,18 +49,11 @@ class LLMClient:
         """
         return self.messages.copy()
 
-    def completion(
-        self,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        **kwargs: Any
-    ) -> Any:
+    def completion(self, **kwargs: Any) -> Any:
         """
         Generate a completion using the current message history.
 
         Args:
-            temperature: Override the default temperature
-            max_tokens: Override the default max_tokens
             **kwargs: Additional arguments to pass to litellm.completion()
 
         Returns:
@@ -77,13 +62,12 @@ class LLMClient:
         params = {
             "model": self.model,
             "messages": self.messages,
-            "temperature": temperature if temperature is not None else self.temperature,
+            "temperature": self.temperature,
             **self.additional_params,
             **kwargs
         }
 
-        if max_tokens is not None or self.max_tokens is not None:
-            params["max_tokens"] = max_tokens if max_tokens is not None else self.max_tokens
+        if self.max_tokens is not None:
+            params["max_tokens"] = self.max_tokens
 
-        response = litellm.completion(**params)
-        return response
+        return litellm.completion(**params)
