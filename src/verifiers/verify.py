@@ -94,7 +94,7 @@ def validate_words(
     errors: List[ValidationError] = []
     warnings: List[ValidationError] = []
     
-    intended_set = {w.upper() for w in intended_words}
+    intended_set = set(intended_words)
     
     # Check intended words are valid (TWL uses lowercase)
     for word in intended_words:
@@ -176,45 +176,3 @@ def verify(spec: str) -> ValidationResult:
         words=intended_words,
         grid=rendered_grid
     )
-
-
-if __name__ == '__main__':
-    # Test with the example
-    example = """
-<board>
-SCURRIES H
-NINES[4] @ SCURRIES[0] V
-RUNES[2] @ NINES[0] H
-YEN[2] @ NINES[2] H
-BRAWN[1] @ SCURRIES[3] V
-DEN[2] @ BRAWN[4] H
-DEED[0] @ DEN[0] V
-STIR[2] @ SCURRIES[5] V
-SPARK[0] @ STIR[0] H
-TRAPS[2] @ SPARK[2] V
-TIGER[0] @ TRAPS[0] H
-TAROT[2] @ TIGER[4] V
-</board>
-"""
-    
-    print("=" * 50)
-    print("BOARD VERIFICATION")
-    print("=" * 50)
-    
-    result = verify(example)
-    
-    print(f"\nValid: {result.valid}")
-    print(f"\nWords ({len(result.words)}): {', '.join(result.words)}")
-    
-    if result.errors:
-        print(f"\nErrors ({len(result.errors)}):")
-        for err in result.errors:
-            print(f"  [{err.code}] {err.message}")
-    
-    if result.warnings:
-        print(f"\nWarnings ({len(result.warnings)}):")
-        for warn in result.warnings:
-            print(f"  [{warn.code}] {warn.message}")
-    
-    if result.grid:
-        print(f"\nGrid:\n{result.grid}")
