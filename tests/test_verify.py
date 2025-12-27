@@ -8,8 +8,7 @@ Tests all validation cases:
 - Word validation (INVALID_WORD, ACCIDENTAL_INVALID, ACCIDENTAL_VALID)
 """
 
-import pytest
-from src.verifiers import verify, ValidationResult
+from src.verifiers import verify
 
 
 class TestValidBoards:
