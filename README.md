@@ -54,22 +54,7 @@ uv run python -m src.main configs/example.yaml --output results/my_run.json
 
 Create a YAML config file to customize your benchmark:
 
-**Basic Example:**
-```yaml
-max_turns: 50
-seed: 42
-
-players:
-  - model: gpt-4o
-    temperature: 1.0
-    max_tokens: 2048
-
-  - model: claude-3-5-sonnet
-    temperature: 1.0
-    max_tokens: 2048
-```
-
-**Advanced Example** (per-player kwargs, custom names, provider-specific params):
+**Example**
 ```yaml
 max_turns: 50
 seed: 42
