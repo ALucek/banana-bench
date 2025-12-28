@@ -54,27 +54,53 @@ uv run python -m src.main configs/example.yaml --output results/my_run.json
 
 Create a YAML config file to customize your benchmark:
 
+**Basic Example:**
 ```yaml
-# Number of players (1-8)
-num_players: 1
-
-# Maximum turns before ending the benchmark
 max_turns: 50
-
-# Random seed for reproducibility (optional)
 seed: 42
 
-# LLM models to use (cycles through if fewer than num_players)
-models:
-  - gpt-5.2-2025-12-11
-  - gpt-5-mini-2025-08-07
+players:
+  - model: gpt-4o
+    temperature: 1.0
+    max_tokens: 2048
 
-# LLM temperature
-temperature: 1.0
-
-# Max tokens for LLM responses (optional)
-max_tokens: 2048
+  - model: claude-3-5-sonnet
+    temperature: 1.0
+    max_tokens: 2048
 ```
+
+**Advanced Example** (per-player kwargs, custom names, provider-specific params):
+```yaml
+max_turns: 50
+seed: 42
+
+players:
+  - model: gpt-4o
+    name: "GPT-4o Aggressive"
+    temperature: 1.2
+    max_tokens: 2048
+
+  - model: claude-3-5-sonnet-20241022
+    name: "Claude with Extended Thinking"
+    temperature: 0.7
+    max_tokens: 4096
+    # Claude-specific: extended thinking
+    thinking:
+      type: enabled
+      budget_tokens: 10000
+
+  - model: gpt-4o-mini
+    name: "Deterministic Player"
+    temperature: 0.0
+    max_tokens: 1024
+```
+
+**Key Features:**
+- Each player can have different model, temperature, and max_tokens
+- Pass provider-specific kwargs (like Claude's `thinking` parameter)
+- Mix and match any LiteLLM-supported parameters
+- Optional custom names for better result tracking
+- Number of players is automatically determined by the players list
 
 ## How It Works
 

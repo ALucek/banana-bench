@@ -1,22 +1,23 @@
-# Example Banana-Bench configuration
+# Banana-Bench Configuration
 
-# Number of players (1-8)
-num_players: 2
+# Game settings
+max_turns: 250
+seed: 42
 
-# Maximum turns before ending the benchmark
-max_turns: 100
+# Player configurations with individual settings
+players:
+  # GPT-5.2 with standard settings
+  - model: gpt-5.2-2025-12-11
+    name: "GPT-5.2 Standard Player 1"
+    temperature: 1.0
+    max_tokens: 4096
 
-# Random seed for reproducibility (optional)
-seed: 43
+  # Claude Sonnet with extended thinking
+  - model: gpt-5.2-2025-12-11
+    name: "GPT-5.2 Standard Player 2"
+    temperature: 1
+    max_tokens: 4096
 
-# LLM models to use (cycles through if fewer than num_players)
-models:
-  - gpt-5.2-2025-12-11
-  - gpt-5.2-2025-12-11
-
-# LLM temperature
-temperature: 1
-
-# Max tokens for LLM responses (optional)
-# max_tokens: 2048
-
+# Note: num_players will be auto-set to 3 based on the players list
+# You can also cycle through players if num_players > len(players)
+num_players: 3

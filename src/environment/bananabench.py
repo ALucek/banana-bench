@@ -10,14 +10,27 @@ from .prompts import SYSTEM_PROMPT, build_player_prompt
 from ..verifiers.models import ValidationError
 
 
-class BenchmarkConfig(BaseModel):
-    """Configuration for a benchmark run."""
-    num_players: int = 1
-    max_turns: int = 100
-    seed: Optional[int] = None
-    models: List[str] = Field(default_factory=lambda: ["gpt-4o"])
+class PlayerConfig(BaseModel):
+    """Configuration for a single player."""
+    model_config = ConfigDict(extra='allow')
+
+    model: str
+    name: Optional[str] = None
     temperature: float = 1.0
     max_tokens: Optional[int] = None
+    # Additional kwargs are allowed and passed to LiteLLM
+
+
+class BenchmarkConfig(BaseModel):
+    """Configuration for a benchmark run."""
+    max_turns: int = 100
+    seed: Optional[int] = None
+    players: List[PlayerConfig] = Field(default_factory=lambda: [PlayerConfig(model="gpt-4o")])
+
+    @property
+    def num_players(self) -> int:
+        """Number of players (automatically derived from players list)."""
+        return len(self.players)
 
 
 class BenchmarkResult(BaseModel):
@@ -84,22 +97,34 @@ class BananaBench(BaseModel):
         
         # Create the game
         game = Game.create(num_players=config.num_players, seed=config.seed)
-        
-        # Create players
+
+        # Create players from player configs
         players = []
         for i in range(config.num_players):
-            # Assign model - cycle through if fewer models than players
-            model = config.models[i % len(config.models)]
-            
+            # Cycle through player configs if fewer than num_players
+            player_config = config.players[i % len(config.players)]
+
+            # Determine player name
+            player_name = player_config.name or f"Player {i+1} ({player_config.model})"
+
+            # Extract base kwargs
+            llm_kwargs = {
+                "temperature": player_config.temperature,
+                "max_tokens": player_config.max_tokens,
+            }
+
+            # Add any extra kwargs from player config (e.g., thinking params for Claude)
+            if hasattr(player_config, '__pydantic_extra__') and player_config.__pydantic_extra__:
+                llm_kwargs.update(player_config.__pydantic_extra__)
+
             player = Player.create(
                 player_id=f"p{i+1}",
-                model=model,
-                name=f"Player {i+1} ({model})",
-                temperature=config.temperature,
-                max_tokens=config.max_tokens,
+                model=player_config.model,
+                name=player_name,
+                **llm_kwargs
             )
             players.append(player)
-        
+
         return cls(game=game, players=players, config=config)
     
     def setup(self) -> None:
