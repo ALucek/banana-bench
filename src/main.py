@@ -57,7 +57,12 @@ Example config.yaml:
         action="store_true",
         help="Print progress to stdout"
     )
-    
+    parser.add_argument(
+        "--visualize",
+        action="store_true",
+        help="Generate an HTML visualizer after the benchmark"
+    )
+
     args = parser.parse_args()
     
     # Load config
@@ -95,10 +100,16 @@ Example config.yaml:
     
     # Save results
     bench.save_result(output_path)
-    
+
     if args.verbose:
         print()
         print(f"Results saved to: {output_path}")
+
+    # Generate visualizer if requested
+    if args.visualize:
+        from .visualizer import generate_visualizer
+        html_path = generate_visualizer(output_path)
+        print(f"Visualizer generated: {html_path}")
     
     # Print summary
     print()

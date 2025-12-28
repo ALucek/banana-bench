@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ game_title }} - Banana-Bench</title>
+  <style>
+{{ inline_css }}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="logo">Banana-Bench</h1>
+        <div class="game-info">
+          <span class="info-badge">{{ num_players }} Players</span>
+          <span class="info-badge">{{ total_turns }} Turns</span>
+          <span class="info-badge end-reason">{{ end_reason }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Bunch Pile (Fixed at top center) -->
+    <div class="bunch-pile" id="bunch-pile">
+      <div class="tile-stack">
+        <div class="stack-tile"></div>
+        <div class="stack-tile"></div>
+        <div class="stack-tile"></div>
+      </div>
+      <div class="bunch-info">
+        <span id="bunch-count-number">0</span>
+        <span class="bunch-label">tiles in bunch</span>
+      </div>
+    </div>
+
+    <!-- Game Table (Players side by side) -->
+    <main class="game-table" id="game-table">
+      <!-- Player stations will be dynamically inserted here -->
+    </main>
+
+    <!-- Controls Footer -->
+    <footer class="controls-footer">
+      <div class="controls-row">
+        <!-- Playback Controls -->
+        <div class="playback-controls">
+          <button class="control-btn" id="btn-start" title="Go to start">⏮</button>
+          <button class="control-btn" id="btn-prev" title="Previous turn">◀</button>
+          <button class="control-btn play-btn" id="btn-play" title="Play/Pause">▶</button>
+          <button class="control-btn" id="btn-next" title="Next turn">▶</button>
+          <button class="control-btn" id="btn-end" title="Go to end">⏭</button>
+
+          <select class="speed-select" id="speed-select" title="Playback speed">
+            <option value="0.25">0.25x</option>
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x</option>
+            <option value="2">2x</option>
+          </select>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-container">
+          <div class="timeline-track" id="timeline-track">
+            <!-- Turn markers will be inserted here -->
+            <div class="timeline-handle" id="timeline-handle"></div>
+          </div>
+        </div>
+
+        <!-- Turn Info -->
+        <div class="turn-info">
+          <span class="turn-label">Turn <span id="current-turn">0</span>/<span id="total-turns">0</span></span>
+          <span class="turn-player" id="turn-player"></span>
+          <span class="turn-status" id="turn-status"></span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Embedded Game Data -->
+  <script id="game-data" type="application/json">
+{{ game_data_json }}
+  </script>
+
+  <!-- Application JavaScript -->
+  <script>
+{{ inline_js }}
+  </script>
+</body>
+</html>

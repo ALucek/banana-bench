@@ -102,6 +102,35 @@ players:
 - Optional custom names for better result tracking
 - Number of players is automatically determined by the players list
 
+## Visualization
+
+Banana-Bench includes an interactive HTML visualizer that lets you watch games play out turn-by-turn with animations and detailed player insights.
+
+### Generating Visualizations
+
+**Generate during benchmark run:**
+```bash
+# Run benchmark and automatically create visualizer
+uv run python -m src.main configs/example.yaml --visualize
+```
+
+**Generate from existing results:**
+```bash
+# Convert any results JSON to an interactive visualizer
+uv run python -m src.visualize results/game.json
+
+# Specify custom output location
+uv run python -m src.visualize results/game.json --output my_viz.html
+```
+
+**Open in browser:**
+```bash
+# The visualizer is a self-contained HTML file
+open results/game.html
+```
+
+The visualizer is completely self-contained - all data, styling, and scripts are embedded in a single HTML file that works offline and can be easily shared.
+
 ## How It Works
 
 ### Game Flow
