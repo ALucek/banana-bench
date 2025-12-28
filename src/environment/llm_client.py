@@ -49,9 +49,45 @@ class LLMClient(BaseModel):
         """
         return self.messages.copy()
 
+    def _get_trimmed_messages(self, max_pairs: int = 10) -> List[Dict[str, str]]:
+        """
+        Get trimmed message history keeping system prompt + last N user/assistant pairs.
+
+        Args:
+            max_pairs: Maximum number of user/assistant message pairs to keep (default 10)
+
+        Returns:
+            Trimmed list of messages (system + last N pairs = max 21 messages)
+        """
+        if not self.messages:
+            return []
+
+        # Separate system message from conversation
+        system_msg = None
+        conversation = []
+
+        for msg in self.messages:
+            if msg["role"] == "system":
+                system_msg = msg
+            else:
+                conversation.append(msg)
+
+        # Keep only the last (max_pairs * 2) messages from conversation
+        # This keeps the last max_pairs user/assistant pairs
+        max_conversation_msgs = max_pairs * 2
+        trimmed_conversation = conversation[-max_conversation_msgs:] if len(conversation) > max_conversation_msgs else conversation
+
+        # Reconstruct: system + trimmed conversation
+        result = []
+        if system_msg:
+            result.append(system_msg)
+        result.extend(trimmed_conversation)
+
+        return result
+
     def completion(self, **kwargs: Any) -> Any:
         """
-        Generate a completion using the current message history.
+        Generate a completion using trimmed message history (system + last 10 pairs).
 
         Args:
             **kwargs: Additional arguments to pass to litellm.completion()
@@ -59,9 +95,12 @@ class LLMClient(BaseModel):
         Returns:
             The completion response from LiteLLM
         """
+        # Use trimmed messages for efficiency (system + last 10 user/assistant pairs)
+        trimmed_messages = self._get_trimmed_messages(max_pairs=10)
+
         params = {
             "model": self.model,
-            "messages": self.messages,
+            "messages": trimmed_messages,
             "temperature": self.temperature,
             **self.additional_params,
             **kwargs
