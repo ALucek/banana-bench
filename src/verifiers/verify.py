@@ -169,10 +169,16 @@ def verify(spec: str) -> ValidationResult:
     # Render grid if no structural errors
     rendered_grid = render_grid(grid) if grid else None
     
+    # Count tiles used and extract letters (from grid cells)
+    tiles_used = len(grid) if grid else 0
+    letters_used = sorted(grid.values()) if grid else []
+    
     return ValidationResult(
         valid=len(all_errors) == 0,
         errors=all_errors,
         warnings=all_warnings,
         words=intended_words,
-        grid=rendered_grid
+        grid=rendered_grid,
+        tiles_used=tiles_used,
+        letters_used=letters_used,
     )

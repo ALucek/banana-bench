@@ -35,4 +35,6 @@ class ValidationResult(BaseModel):
     warnings: List[ValidationError] = Field(default_factory=list)
     words: List[str] = Field(default_factory=list)
     grid: Optional[str] = None
+    tiles_used: int = 0
+    letters_used: List[str] = Field(default_factory=list)  # Actual letters on grid
 
