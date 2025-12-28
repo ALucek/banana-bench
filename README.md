@@ -1,6 +1,6 @@
 # Banana-Bench
 
-<img src="./bb-logo.png" width=200>
+<img src="./bb-logo.png" width=300>
 
 A benchmark for evaluating Large Language Models through the game of Bananagrams. LLMs must build valid crossword-style boards using structured output formats, demonstrating spatial reasoning, constraint satisfaction, and multi-turn strategic decision-making.
 
