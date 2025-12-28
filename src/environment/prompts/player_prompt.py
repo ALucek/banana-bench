@@ -1,5 +1,3 @@
-"""Player prompt for formatting game state and feedback."""
-
 from typing import Dict, List, Optional
 
 
@@ -47,6 +45,7 @@ def build_player_prompt(
     is_end_state: bool,
     turn_number: int,
     current_board: Optional[str] = None,
+    rendered_grid: Optional[str] = None,
     last_action: Optional[str] = None,
     validation_errors: Optional[List[str]] = None,
     validation_warnings: Optional[List[str]] = None,
@@ -54,7 +53,7 @@ def build_player_prompt(
 ) -> str:
     """
     Build the player prompt with current game state and feedback.
-    
+
     Args:
         hand: Current tiles in hand
         tiles_in_bunch: Tiles remaining in the bunch
@@ -62,11 +61,12 @@ def build_player_prompt(
         is_end_state: Whether BANANAS can be called
         turn_number: Current turn number
         current_board: Player's current board spec (if any)
+        rendered_grid: Rendered visual grid of the board (if any)
         last_action: The action attempted last turn
         validation_errors: Errors from last board validation
         validation_warnings: Warnings from last validation
         action_error: Error from last action attempt
-        
+
     Returns:
         Formatted prompt string
     """
@@ -104,17 +104,28 @@ def build_player_prompt(
     # Current board if exists
     if current_board:
         lines.append("### Your Current Board")
+
+        # Show rendered grid if available
+        if rendered_grid:
+            lines.append("Visual grid:")
+            lines.append("```")
+            lines.append(rendered_grid)
+            lines.append("```")
+            lines.append("")
+
+        # Show board specification
+        lines.append("Board specification:")
         lines.append("```")
         lines.append(current_board)
         lines.append("```")
         lines.append("")
-    
+
     # Instructions
-    lines.append("### Instructions")
-    lines.append("Build a valid crossword grid using ALL your tiles.")
-    lines.append("When valid and complete, PEEL happens automatically and you'll get a new tile.")
-    lines.append("Use DUMP X to exchange a difficult letter. Winning is automatic when bunch is empty!")
-    lines.append("Respond with <game_plan>, <action>, and <board> tags.")
-    
+    # lines.append("### Instructions")
+    # lines.append("Build a valid crossword grid using ALL your tiles.")
+    # lines.append("When valid and complete, PEEL happens automatically and you'll get a new tile.")
+    # lines.append("Use DUMP X to exchange a difficult letter. Winning is automatic when bunch is empty!")
+    # lines.append("Respond with <game_plan>, <action>, and <board> tags.")
+
     return "\n".join(lines)
 

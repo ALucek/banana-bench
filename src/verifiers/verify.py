@@ -35,7 +35,8 @@ def validate_structure(entries: List[WordEntry]) -> List[ValidationError]:
                 code="TARGET_NOT_FOUND",
                 message=f"Target word '{entry.target}' not placed before '{entry.word}'",
                 word=entry.word,
-                line=i
+                line=i,
+                cascade_level=1  # CRITICAL
             ))
             continue
         
@@ -47,7 +48,8 @@ def validate_structure(entries: List[WordEntry]) -> List[ValidationError]:
                 code="TARGET_INDEX_OOB",
                 message=f"Target index {entry.target_idx} out of bounds for '{entry.target}' (length {len(entry.target)})",
                 word=entry.word,
-                line=i
+                line=i,
+                cascade_level=1  # CRITICAL
             ))
             continue
         
@@ -57,7 +59,8 @@ def validate_structure(entries: List[WordEntry]) -> List[ValidationError]:
                 code="WORD_INDEX_OOB",
                 message=f"Word index {entry.word_idx} out of bounds for '{entry.word}' (length {len(entry.word)})",
                 word=entry.word,
-                line=i
+                line=i,
+                cascade_level=1  # CRITICAL
             ))
             continue
         
@@ -67,9 +70,15 @@ def validate_structure(entries: List[WordEntry]) -> List[ValidationError]:
         if target_letter != word_letter:
             errors.append(ValidationError(
                 code="LETTER_MISMATCH",
-                message=f"Letter mismatch: {entry.word}[{entry.word_idx}]='{word_letter}' vs {entry.target}[{entry.target_idx}]='{target_letter}'",
+                message=(
+                    f"Letter mismatch: {entry.word}[{entry.word_idx}]='{word_letter}' vs "
+                    f"{entry.target}[{entry.target_idx}]='{target_letter}'. "
+                    f"TIP: {entry.word} should share the letter '{target_letter}' at position "
+                    f"{entry.word_idx}, not '{word_letter}'."
+                ),
                 word=entry.word,
-                line=i
+                line=i,
+                cascade_level=1  # CRITICAL
             ))
         
         # Check perpendicularity
@@ -78,7 +87,8 @@ def validate_structure(entries: List[WordEntry]) -> List[ValidationError]:
                 code="SAME_DIRECTION",
                 message=f"'{entry.word}' must be perpendicular to '{entry.target}' (both are {entry.direction})",
                 word=entry.word,
-                line=i
+                line=i,
+                cascade_level=1  # CRITICAL
             ))
         
         placed_words[entry.word] = entry
@@ -102,7 +112,8 @@ def validate_words(
             errors.append(ValidationError(
                 code="INVALID_WORD",
                 message=f"'{word}' is not a valid dictionary word",
-                word=word
+                word=word,
+                cascade_level=3  # MEDIUM
             ))
     
     # Check for accidental words (words on grid that weren't intended)
@@ -112,13 +123,15 @@ def validate_words(
             errors.append(ValidationError(
                 code="ACCIDENTAL_INVALID",
                 message=f"Accidental word '{word}' on grid is not a valid dictionary word",
-                word=word
+                word=word,
+                cascade_level=3  # MEDIUM
             ))
         else:
             warnings.append(ValidationError(
                 code="ACCIDENTAL_VALID",
                 message=f"Accidental word '{word}' formed on grid (valid, but not declared)",
-                word=word
+                word=word,
+                cascade_level=3  # MEDIUM
             ))
     
     return errors, warnings

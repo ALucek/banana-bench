@@ -4,7 +4,7 @@
 num_players: 2
 
 # Maximum turns before ending the benchmark
-max_turns: 30
+max_turns: 100
 
 # Random seed for reproducibility (optional)
 seed: 42

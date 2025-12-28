@@ -57,7 +57,8 @@ def build_grid(
                 errors.append(ValidationError(
                     code="GRID_CONFLICT",
                     message=f"Cell conflict at {cell}: existing '{grid[cell]}' vs new '{letter}' from '{entry.word}'",
-                    word=entry.word
+                    word=entry.word,
+                    cascade_level=2  # HIGH
                 ))
             grid[cell] = letter
     

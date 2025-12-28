@@ -1,5 +1,3 @@
-"""System prompt for Bananagrams LLM player."""
-
 SYSTEM_PROMPT = """You are playing a highly competitive round of Bananagrams, a word game where you build a crossword-style grid using letter tiles.
 
 ## Rules
@@ -8,6 +6,8 @@ SYSTEM_PROMPT = """You are playing a highly competitive round of Bananagrams, a 
 3. All words must connect to form one grid (no floating words)
 4. All 2+ letter sequences on the grid must be valid Scrabble Tournament words
 5. Words must be at least 2 letters long
+6. You are competing against another player to build the best board before the bunch is depleted.
+7. Your ultimate goal is to win the game!
 
 ## Actions
 - **DUMP X**: Return tile X to get 3 new tiles (if you have a difficult letter)

@@ -256,14 +256,27 @@ class BananaBench(BaseModel):
     
     def _get_last_turn_feedback(self, player: Player) -> Dict[str, Any]:
         """Get feedback from the player's last turn."""
+        from ..verifiers.cascade import filter_cascading_errors
+
         # Find the player's most recent turn
         for turn in reversed(self.turn_history):
             if turn.player_id == player.player_id:
+                # Filter cascading errors
+                filtered_errors = None
+                if turn.validation and turn.validation.errors:
+                    filtered_errors = filter_cascading_errors(turn.validation.errors)
+
+                # Get rendered grid if available
+                rendered_grid = None
+                if turn.validation and turn.validation.grid:
+                    rendered_grid = turn.validation.grid
+
                 return {
-                    "validation_errors": [e.message for e in turn.validation.errors] if turn.validation else None,
+                    "validation_errors": [e.message for e in filtered_errors] if filtered_errors else None,
                     "validation_warnings": [w.message for w in turn.validation.warnings] if turn.validation else None,
                     "action_error": turn.error,
                     "last_action": turn.action,
+                    "rendered_grid": rendered_grid,
                 }
         return {}
     
@@ -367,16 +380,17 @@ class BananaBench(BaseModel):
                 if missing:
                     validation.errors.append(ValidationError(
                         code="TILES_NOT_IN_HAND",
-                        message=f"Board uses tiles not in hand: {dict(missing)}"
+                        message=f"Board uses tiles not in hand: {dict(missing)}",
+                        cascade_level=4  # LOW
                     ))
-                
+                    validation.valid = False
+
                 if unused:
-                    validation.errors.append(ValidationError(
+                    validation.warnings.append(ValidationError(
                         code="TILES_UNUSED",
-                        message=f"Tiles in hand not used: {dict(unused)}"
+                        message=f"Tiles in hand not used: {dict(unused)}",
+                        cascade_level=4  # LOW
                     ))
-                
-                validation.valid = False
             
             # Check if board is valid and uses exactly all tiles correctly
             if validation.valid and tiles_match and uses_all_tiles:

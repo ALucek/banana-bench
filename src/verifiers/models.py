@@ -26,6 +26,7 @@ class ValidationError(BaseModel):
     message: str
     word: Optional[str] = None
     line: Optional[int] = None
+    cascade_level: int = 0  # 0=FATAL, 1=CRITICAL, 2=HIGH, 3=MEDIUM, 4=LOW
 
 
 class ValidationResult(BaseModel):

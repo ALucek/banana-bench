@@ -29,7 +29,8 @@ def parse_board(spec: str) -> Tuple[List[WordEntry], List[ValidationError]]:
     if not lines:
         errors.append(ValidationError(
             code="EMPTY_BOARD",
-            message="Board specification is empty"
+            message="Board specification is empty",
+            cascade_level=0  # FATAL
         ))
         return entries, errors
     
@@ -38,8 +39,9 @@ def parse_board(spec: str) -> Tuple[List[WordEntry], List[ValidationError]]:
     if not root_match:
         errors.append(ValidationError(
             code="INVALID_ROOT",
-            message=f"Invalid root line format: '{lines[0]}'",
-            line=1
+            message=f"Invalid root line format: '{lines[0]}'. Expected: 'WORD H' or 'WORD V'. Example: 'CAT H'",
+            line=1,
+            cascade_level=0  # FATAL
         ))
         return entries, errors
     
@@ -55,8 +57,9 @@ def parse_board(spec: str) -> Tuple[List[WordEntry], List[ValidationError]]:
         if not match:
             errors.append(ValidationError(
                 code="INVALID_LINE",
-                message=f"Invalid line format: '{line}'",
-                line=i
+                message=f"Invalid line format: '{line}'. Expected: 'WORD[j] @ TARGET[i] DIRECTION'. Example: 'DOG[0] @ CAT[2] V'",
+                line=i,
+                cascade_level=0  # FATAL
             ))
             continue
         
