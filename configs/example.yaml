@@ -7,14 +7,14 @@ num_players: 2
 max_turns: 100
 
 # Random seed for reproducibility (optional)
-seed: 42
+seed: 43
 
 # LLM models to use (cycles through if fewer than num_players)
 models:
   - gpt-5.2-2025-12-11
-  - gpt-5.2-2025-12-11
+  - gpt-5-mini-2025-08-07
 
-# LLM temperature (0.0-2.0)
+# LLM temperature
 temperature: 1
 
 # Max tokens for LLM responses (optional)
