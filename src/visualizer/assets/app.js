@@ -172,18 +172,12 @@ function setupTimelineDrag() {
 }
 
 function initializeControls() {
-  document.getElementById('btn-start').addEventListener('click', () => {
-    if (!state.isAnimating) goToTurn(0, false);
-  });
   document.getElementById('btn-prev').addEventListener('click', () => {
-    if (!state.isAnimating) stepTurn(-1);
+    if (!state.isAnimating) stepTurn(-1, false);
   });
   document.getElementById('btn-play').addEventListener('click', togglePlay);
   document.getElementById('btn-next').addEventListener('click', () => {
-    if (!state.isAnimating) stepTurn(1);
-  });
-  document.getElementById('btn-end').addEventListener('click', () => {
-    if (!state.isAnimating) goToTurn(state.gameData.turn_history.length - 1, false);
+    if (!state.isAnimating) stepTurn(1, false);
   });
 
   document.getElementById('speed-select').addEventListener('change', (e) => {
@@ -202,13 +196,9 @@ function initializeControls() {
       e.preventDefault();
       togglePlay();
     } else if (e.code === 'ArrowLeft') {
-      stepTurn(-1);
+      stepTurn(-1, false);
     } else if (e.code === 'ArrowRight') {
-      stepTurn(1);
-    } else if (e.code === 'Home') {
-      goToTurn(0, false);
-    } else if (e.code === 'End') {
-      goToTurn(state.gameData.turn_history.length - 1, false);
+      stepTurn(1, false);
     } else if (e.code === 'Escape') {
       stopPlayback();
       cancelAnimations();
@@ -306,11 +296,19 @@ function renderTurn(turnIndex, animate = true) {
     if (isActive && animate) {
       // Active player: animate with phases
       renderActivePlayerWithAnimation(playerId, turn);
+    } else if (isActive && !animate) {
+      // Active player without animation (e.g., scrubbing timeline)
+      renderPlayerStatic(playerId, turn);
     } else if (playerTurn) {
       // Inactive player: just show their last state (no animation)
       renderPlayerStatic(playerId, playerTurn);
     } else {
       renderInitialState(playerId);
+    }
+
+    // Scroll to active player
+    if (isActive) {
+      scrollToPlayer(playerId);
     }
   });
 
@@ -500,13 +498,131 @@ function renderPlayerHand(playerId, turn) {
   const handContainer = station.querySelector('.player-hand');
   handContainer.innerHTML = '';
 
-  const tiles = turn.tiles_after || turn.tiles_before || [];
-  tiles.forEach((letter) => {
-    const tile = document.createElement('div');
-    tile.className = 'hand-tile';
-    tile.textContent = letter;
-    handContainer.appendChild(tile);
+  const tilesBefore = turn.tiles_before || [];
+  const tilesAfter = turn.tiles_after || [];
+  const grid = turn.validation?.grid || '';
+
+  // Parse tiles on the board from the grid
+  const tilesOnBoard = [];
+  for (let char of grid) {
+    if (char.match(/[A-Z]/)) {
+      tilesOnBoard.push(char);
+    }
+  }
+
+  // Count tiles in hand and on board
+  const handCounter = {};
+  const boardCounter = {};
+
+  tilesBefore.forEach(tile => {
+    handCounter[tile] = (handCounter[tile] || 0) + 1;
   });
+
+  tilesOnBoard.forEach(tile => {
+    boardCounter[tile] = (boardCounter[tile] || 0) + 1;
+  });
+
+  // Build lists of used vs unused tiles from the hand
+  const tilesUsedOnBoard = [];
+  const tilesUnused = [];
+
+  const handCounterCopy = {...handCounter};
+
+  // First, extract tiles that are on the board
+  for (let tile in boardCounter) {
+    const countOnBoard = boardCounter[tile];
+    const countInHand = handCounterCopy[tile] || 0;
+    const usedFromHand = Math.min(countOnBoard, countInHand);
+
+    for (let i = 0; i < usedFromHand; i++) {
+      tilesUsedOnBoard.push(tile);
+      handCounterCopy[tile]--;
+    }
+  }
+
+  // Remaining tiles in hand are unused
+  for (let tile in handCounterCopy) {
+    for (let i = 0; i < handCounterCopy[tile]; i++) {
+      tilesUnused.push(tile);
+    }
+  }
+
+  // Detect new tiles (in tilesAfter but not in tilesBefore)
+  const beforeCounter = {};
+  const afterCounter = {};
+
+  tilesBefore.forEach(tile => {
+    beforeCounter[tile] = (beforeCounter[tile] || 0) + 1;
+  });
+
+  tilesAfter.forEach(tile => {
+    afterCounter[tile] = (afterCounter[tile] || 0) + 1;
+  });
+
+  const newTiles = [];
+  for (let tile in afterCounter) {
+    const newCount = afterCounter[tile] - (beforeCounter[tile] || 0);
+    for (let i = 0; i < newCount; i++) {
+      newTiles.push(tile);
+    }
+  }
+
+  // Render tiles used on board (if any)
+  if (tilesUsedOnBoard.length > 0) {
+    const usedLabel = document.createElement('div');
+    usedLabel.className = 'hand-section-label';
+    usedLabel.textContent = 'On Board:';
+    handContainer.appendChild(usedLabel);
+
+    tilesUsedOnBoard.sort().forEach((letter) => {
+      const tile = document.createElement('div');
+      tile.className = 'hand-tile used';
+      tile.textContent = letter;
+      handContainer.appendChild(tile);
+    });
+  }
+
+  // Render unused tiles
+  if (tilesUnused.length > 0) {
+    if (tilesUsedOnBoard.length > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'hand-divider';
+      handContainer.appendChild(divider);
+    }
+
+    const unusedLabel = document.createElement('div');
+    unusedLabel.className = 'hand-section-label';
+    unusedLabel.textContent = 'Unused:';
+    handContainer.appendChild(unusedLabel);
+
+    tilesUnused.sort().forEach((letter) => {
+      const tile = document.createElement('div');
+      tile.className = 'hand-tile';
+      tile.textContent = letter;
+      handContainer.appendChild(tile);
+    });
+  }
+
+  // Render new tiles (if any)
+  if (newTiles.length > 0) {
+    if (tilesUsedOnBoard.length > 0 || tilesUnused.length > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'hand-divider';
+      handContainer.appendChild(divider);
+    }
+
+    const newLabel = document.createElement('div');
+    newLabel.className = 'hand-section-label';
+    newLabel.textContent = 'New:';
+    handContainer.appendChild(newLabel);
+
+    newTiles.sort().forEach((letter) => {
+      const tile = document.createElement('div');
+      tile.className = 'hand-tile new';
+      tile.textContent = letter;
+      handContainer.appendChild(tile);
+    });
+  }
 }
 
 function updatePlayerStatus(playerId, turn) {
@@ -773,6 +889,26 @@ function showActionNotification(turn) {
 // ============================================
 // Utilities
 // ============================================
+
+function scrollToPlayer(playerId) {
+  const station = state.playerStations[playerId];
+  if (!station) return;
+
+  const gameTable = document.getElementById('game-table');
+  if (!gameTable) return;
+
+  // Calculate the scroll position to center the player
+  const stationRect = station.getBoundingClientRect();
+  const tableRect = gameTable.getBoundingClientRect();
+
+  // Calculate offset to center the station in the viewport
+  const scrollOffset = station.offsetLeft - (tableRect.width / 2) + (stationRect.width / 2);
+
+  gameTable.scrollTo({
+    left: scrollOffset,
+    behavior: 'smooth'
+  });
+}
 
 function truncateText(text, maxLength) {
   if (!text) return '';

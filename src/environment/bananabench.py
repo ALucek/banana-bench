@@ -283,6 +283,8 @@ class BananaBench(BaseModel):
         """Get feedback from the player's last turn."""
         from ..verifiers.cascade import filter_cascading_errors
 
+        peel_tiles = player.pending_peel_tiles or None
+
         # Find the player's most recent turn
         for turn in reversed(self.turn_history):
             if turn.player_id == player.player_id:
@@ -302,8 +304,9 @@ class BananaBench(BaseModel):
                     "action_error": turn.error,
                     "last_action": turn.action,
                     "rendered_grid": rendered_grid,
+                    "peel_tiles": peel_tiles,
                 }
-        return {}
+        return {"peel_tiles": peel_tiles} if peel_tiles else {}
     
     def step(self, player: Optional[Player] = None) -> TurnResult:
         """
@@ -344,6 +347,8 @@ class BananaBench(BaseModel):
             current_board=player.board_spec,
             **feedback
         )
+        if player.pending_peel_tiles:
+            player.pending_peel_tiles.clear()
         
         # Add system prompt if this is the first message
         if not player.llm_client.messages:
@@ -374,7 +379,7 @@ class BananaBench(BaseModel):
         
         # Add assistant response to history
         player.llm_client.add_message("assistant", raw_response)
-        
+
         # Parse the response
         parsed = Player.parse_response(raw_response)
         
@@ -429,7 +434,9 @@ class BananaBench(BaseModel):
                 elif self.game.can_peel():
                     peel_tiles = self.game.peel()
                     for i, p in enumerate(self.players):
-                        p.add_tiles([peel_tiles[i]])
+                        tile = peel_tiles[i]
+                        p.add_tiles([tile])
+                        p.pending_peel_tiles.append(tile.upper())
                     auto_peeled = True
         
         # Process explicit actions (DUMP only now)

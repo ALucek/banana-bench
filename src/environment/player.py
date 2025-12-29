@@ -68,6 +68,7 @@ class Player(BaseModel):
     llm_client: Optional[LLMClient] = None
     turn_count: int = 0
     last_validation: Optional[ValidationResult] = None
+    pending_peel_tiles: List[str] = Field(default_factory=list)
     
     def model_post_init(self, __context) -> None:
         """Set default name if not provided."""

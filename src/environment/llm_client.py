@@ -96,6 +96,7 @@ class LLMClient(BaseModel):
             The completion response from LiteLLM
         """
         # Use trimmed messages for efficiency (system + last 10 user/assistant pairs)
+        # This provides ~50 messages of context for long games
         trimmed_messages = self._get_trimmed_messages(max_pairs=10)
 
         params = {
@@ -108,5 +109,11 @@ class LLMClient(BaseModel):
 
         if self.max_tokens is not None:
             params["max_tokens"] = self.max_tokens
+
+        # If reasoning_effort is specified (OpenAI compatibility), allow it through
+        if "reasoning_effort" in params:
+            params.setdefault("allowed_openai_params", [])
+            if "reasoning_effort" not in params["allowed_openai_params"]:
+                params["allowed_openai_params"].append("reasoning_effort")
 
         return litellm.completion(**params)

@@ -1,23 +1,44 @@
 # Banana-Bench Configuration
 
 # Game settings
-max_turns: 250
+max_turns: 500
 seed: 42
 
 # Player configurations with individual settings
 players:
-  # GPT-5.2 with standard settings
+  # GPT-5.2 - Standard
   - model: gpt-5.2-2025-12-11
-    name: "GPT-5.2 Standard Player 1"
-    temperature: 1.0
-    max_tokens: 4096
-
-  # Claude Sonnet with extended thinking
-  - model: gpt-5.2-2025-12-11
-    name: "GPT-5.2 Standard Player 2"
+    name: "GPT-5.2"
     temperature: 1
-    max_tokens: 4096
 
-# Note: num_players will be auto-set to 3 based on the players list
+  # GPT-5.1 - Standard
+  - model: gpt-5.1-2025-11-13
+    name: "GPT-5.1"
+    temperature: 1
+
+  # GPT-5.2 - Medium Reasoning
+  - model: gpt-5.2-2025-12-11
+    name: "GPT-5.2 - Medium Reasoning"
+    temperature: 1
+    reasoning_effort: medium
+
+  # GPT-5.1 - Medium Reasoning
+  - model: gpt-5.1-2025-11-13
+    name: "GPT-5.1 - Medium Reasoning"
+    temperature: 1
+    reasoning_effort: medium
+
+  # GPT-5 Mini
+  - model: gpt-5-mini-2025-08-07
+    name: "GPT-5 Mini"
+    temperature: 1
+  
+  # GPT-5 Mini - Medium Reasoning
+  - model: gpt-5-mini-2025-08-07
+    name: "GPT-5 Mini - Medium Reasoning"
+    temperature: 1
+    reasoning_effort: medium
+
+# Note: num_players will be auto-set based on the players list
 # You can also cycle through players if num_players > len(players)
-num_players: 3
+num_players: 6

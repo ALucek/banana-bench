@@ -15,9 +15,13 @@ def format_feedback(
     validation_errors: Optional[List[str]] = None,
     validation_warnings: Optional[List[str]] = None,
     action_error: Optional[str] = None,
+    peel_tiles: Optional[List[str]] = None,
 ) -> str:
     """Format feedback from the previous turn."""
     lines = []
+
+    if peel_tiles:
+        lines.append(f"Auto-PEEL happened: you drew {' '.join(peel_tiles)}")
     
     if action_error:
         lines.append(f"Action failed: {action_error}")
@@ -50,6 +54,7 @@ def build_player_prompt(
     validation_errors: Optional[List[str]] = None,
     validation_warnings: Optional[List[str]] = None,
     action_error: Optional[str] = None,
+    peel_tiles: Optional[List[str]] = None,
 ) -> str:
     """
     Build the player prompt with current game state and feedback.
@@ -66,6 +71,7 @@ def build_player_prompt(
         validation_errors: Errors from last board validation
         validation_warnings: Warnings from last validation
         action_error: Error from last action attempt
+        peel_tiles: Tiles drawn from any auto-PEEL since last prompt
 
     Returns:
         Formatted prompt string
@@ -77,7 +83,12 @@ def build_player_prompt(
     lines.append("")
     
     # Feedback from previous turn
-    feedback = format_feedback(validation_errors, validation_warnings, action_error)
+    feedback = format_feedback(
+        validation_errors=validation_errors,
+        validation_warnings=validation_warnings,
+        action_error=action_error,
+        peel_tiles=peel_tiles,
+    )
     if feedback:
         lines.append("### Feedback from last turn")
         lines.append(feedback)
@@ -120,12 +131,4 @@ def build_player_prompt(
         lines.append("```")
         lines.append("")
 
-    # Instructions
-    # lines.append("### Instructions")
-    # lines.append("Build a valid crossword grid using ALL your tiles.")
-    # lines.append("When valid and complete, PEEL happens automatically and you'll get a new tile.")
-    # lines.append("Use DUMP X to exchange a difficult letter. Winning is automatic when bunch is empty!")
-    # lines.append("Respond with <game_plan>, <action>, and <board> tags.")
-
     return "\n".join(lines)
-
