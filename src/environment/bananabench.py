@@ -668,7 +668,7 @@ class BananaBench(BaseModel):
                 if turn_result.auto_bananas:
                     print(f"\n*** BANANAS! {player.name} WINS! ***")
                 elif turn_result.auto_peeled:
-                    print(f"\nAUTO-PEEL! All tiles used. Everyone draws a tile.")
+                    print("\nAUTO-PEEL! All tiles used. Everyone draws a tile.")
                     print(f"New tile: {turn_result.tiles_after[-1] if turn_result.tiles_after else '?'}")
             
             if on_turn:

@@ -42,7 +42,7 @@ Examples:
         sys.exit(1)
 
     if not results_path.suffix == ".json":
-        print(f"Warning: Input file doesn't have .json extension", file=sys.stderr)
+        print("Warning: Input file doesn't have .json extension", file=sys.stderr)
 
     # Generate visualizer
     try:
