@@ -46,7 +46,12 @@ Example config.yaml:
     )
     parser.add_argument(
         "config",
-        help="Path to YAML configuration file"
+        nargs="?",
+        help="Path to YAML configuration file (not needed with --resume)"
+    )
+    parser.add_argument(
+        "--resume",
+        help="Resume from a saved result JSON file"
     )
     parser.add_argument(
         "--output", "-o",
@@ -64,28 +69,54 @@ Example config.yaml:
     )
 
     args = parser.parse_args()
-    
-    # Load config
-    try:
-        config = load_config(args.config)
-    except Exception as e:
-        print(f"Error loading config: {e}", file=sys.stderr)
-        sys.exit(1)
-    
-    # Determine output path
-    if args.output:
-        output_path = Path(args.output)
+
+    # Handle resume mode
+    if args.resume:
+        if args.verbose:
+            print(f"Resuming from: {args.resume}")
+        try:
+            bench = BananaBench.resume(args.resume)
+            if args.verbose:
+                print(f"Loaded state: Turn {bench.current_turn}, {bench.game.tiles_remaining} tiles in bunch")
+                print()
+        except Exception as e:
+            print(f"Error resuming from {args.resume}: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Determine output path for resumed run
+        if args.output:
+            output_path = Path(args.output)
+        else:
+            # Default: add _resumed to original filename
+            resume_path = Path(args.resume)
+            output_path = resume_path.parent / f"{resume_path.stem}_resumed{resume_path.suffix}"
+
     else:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = Path("results") / f"benchmark_{timestamp}.json"
-    
-    # Create and run benchmark
-    bench = BananaBench.create(config=config)
-    
-    if args.verbose:
-        print(f"Config: {args.config}")
-        print(f"Output: {output_path}")
-        print()
+        # Normal mode: load config and create new benchmark
+        if not args.config:
+            print("Error: config file required (or use --resume)", file=sys.stderr)
+            sys.exit(1)
+
+        try:
+            config = load_config(args.config)
+        except Exception as e:
+            print(f"Error loading config: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Determine output path
+        if args.output:
+            output_path = Path(args.output)
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = Path("results") / f"benchmark_{timestamp}.json"
+
+        # Create benchmark
+        bench = BananaBench.create(config=config)
+
+        if args.verbose:
+            print(f"Config: {args.config}")
+            print(f"Output: {output_path}")
+            print()
     
     try:
         result = bench.run(verbose=args.verbose)

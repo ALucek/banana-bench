@@ -129,7 +129,118 @@ class BananaBench(BaseModel):
             players.append(player)
 
         return cls(game=game, players=players, config=config)
-    
+
+    @classmethod
+    def resume(cls, result_path: str | Path) -> "BananaBench":
+        """
+        Resume a benchmark from a saved result file.
+
+        Args:
+            result_path: Path to the saved result JSON file
+
+        Returns:
+            BananaBench instance restored to the saved state
+        """
+        import json
+        from .game import Game
+
+        result_path = Path(result_path)
+        with open(result_path) as f:
+            data = json.load(f)
+
+        # Reconstruct config
+        config = BenchmarkConfig(**data["config"])
+
+        # Create players with LLM clients
+        players = []
+        for i in range(config.num_players):
+            player_config = config.players[i % len(config.players)]
+            player_name = player_config.name or f"Player {i+1} ({player_config.model})"
+
+            llm_kwargs = {
+                "temperature": player_config.temperature,
+                "max_tokens": player_config.max_tokens,
+            }
+
+            if hasattr(player_config, '__pydantic_extra__') and player_config.__pydantic_extra__:
+                llm_kwargs.update(player_config.__pydantic_extra__)
+
+            player = Player.create(
+                player_id=f"p{i+1}",
+                model=player_config.model,
+                name=player_name,
+                **llm_kwargs
+            )
+            players.append(player)
+
+        # Restore player state from saved data
+        for player in players:
+            player_data = data["player_results"][player.player_id]
+            player.hand = player_data["hand"]
+            player.turn_count = player_data["turn_count"]
+
+            # Restore conversation history
+            if player.player_id in data["conversation_history"]:
+                player.llm_client.messages = data["conversation_history"][player.player_id]
+
+            # Find and restore last board spec and validation from turn history
+            for turn in reversed(data["turn_history"]):
+                if turn["player_id"] == player.player_id and turn.get("board_spec"):
+                    player.board_spec = turn["board_spec"]
+                    # Revalidate the board to restore validation state
+                    if player.board_spec:
+                        player.last_validation = player.validate_board(player.board_spec)
+                    break
+
+        # Reconstruct game state
+        game_data = data["game_state"]
+
+        # Reconstruct the bunch by subtracting player hands from full tile distribution
+        from .game import TILE_DISTRIBUTION
+        from collections import Counter
+
+        # Start with full tile set
+        remaining_tiles = Counter()
+        for letter, count in TILE_DISTRIBUTION.items():
+            remaining_tiles[letter] = count
+
+        # Subtract all tiles in player hands
+        for player in players:
+            player_tiles = Counter(player.hand)
+            remaining_tiles.subtract(player_tiles)
+
+        # Convert back to list
+        bunch = []
+        for letter, count in remaining_tiles.items():
+            if count > 0:
+                bunch.extend([letter] * count)
+
+        # Create game instance
+        game = Game(
+            num_players=game_data["num_players"],
+            bunch=bunch,
+            seed=config.seed,
+            is_end_state=game_data.get("is_end_state", False)
+        )
+
+        # Create benchmark instance
+        bench = cls(
+            game=game,
+            players=players,
+            config=config,
+            turn_history=[],  # Start fresh for new turns
+            current_turn=data["total_turns"],
+            is_complete=False,
+            winner=data.get("winner"),
+            end_reason="",
+        )
+
+        # Restore started_at timestamp
+        if data.get("started_at"):
+            bench.started_at = datetime.fromisoformat(data["started_at"])
+
+        return bench
+
     def setup(self) -> None:
         """
         Initialize the game by dealing starting hands to all players.

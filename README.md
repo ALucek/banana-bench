@@ -9,9 +9,11 @@ A benchmark for evaluating Large Language Models through the game of Bananagrams
 - **LLM-Driven Gameplay**: Models play Bananagrams by generating valid board configurations
 - **Structured Validation**: Comprehensive verification system with cascading error feedback
 - **Multi-Provider Support**: Works with any LLM via LiteLLM (OpenAI, Anthropic, etc.)
-- **Detailed Tracking**: Full conversation history and turn-by-turn analysis
+- **Detailed Tracking**: Full conversation history, turn-by-turn analysis, and token usage tracking
 - **Smart Error Filtering**: Cascading error system prevents overwhelming models with downstream errors
 - **Visual Feedback**: Rendered grid visualization helps models understand board state
+- **Resume Capability**: Resume interrupted benchmarks from saved state
+- **Result Cleanup**: Clean up error-filled results before resuming
 
 ## Setup and Install
 
@@ -79,6 +81,18 @@ players:
 - Optional custom names for better result tracking
 - Number of players is automatically determined by the players list
 
+### Resuming Interrupted Runs
+
+If a benchmark is interrupted (API quota limits, crashes, etc.), you can resume from where it left off:
+
+```bash
+# Resume from a saved result file
+uv run python -m src.main --resume results/interrupted_run.json --verbose
+
+# Resume and save to a specific output file
+uv run python -m src.main --resume results/interrupted_run.json --output results/final_run.json
+```
+
 ## Visualization
 
 <img src="./media/visualizer.png" width=600>
@@ -138,6 +152,7 @@ Benchmark results are saved as JSON files containing:
 - Complete conversation history for each player
 - Final game state and outcome
 - Timing information
+- **Token usage tracking**: Per-turn and total token counts (prompt, completion, and total tokens)
 
 ## Acknowledgements
 
