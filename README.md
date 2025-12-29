@@ -81,7 +81,7 @@ players:
 
 ## Visualization
 
-<img src="./media/visualizer.gif" width=600>
+<img src="./media/visualizer.png" width=600>
 
 Banana-Bench includes an interactive HTML visualizer that lets you watch games play out turn-by-turn with animations and player insights.
 
