@@ -48,6 +48,8 @@ uv run python -m src.main configs/example.yaml --verbose
 
 # Save results to a specific location
 uv run python -m src.main configs/example.yaml --output results/my_run.json
+
+
 ```
 
 ### Configuration
@@ -56,28 +58,18 @@ Create a YAML config file to customize your benchmark:
 
 **Example**
 ```yaml
-max_turns: 50
+max_turns: 500
 seed: 42
 
 players:
-  - model: gpt-4o
-    name: "GPT-4o Aggressive"
-    temperature: 1.2
-    max_tokens: 2048
+  - model: gpt-5.2-2025-12-11
+    name: "GPT-5.2"
+    temperature: 1
 
-  - model: claude-3-5-sonnet-20241022
-    name: "Claude with Extended Thinking"
-    temperature: 0.7
-    max_tokens: 4096
-    # Claude-specific: extended thinking
-    thinking:
-      type: enabled
-      budget_tokens: 10000
-
-  - model: gpt-4o-mini
-    name: "Deterministic Player"
-    temperature: 0.0
-    max_tokens: 1024
+  - model: gpt-5.2-2025-12-11
+    name: "GPT-5.2 - Medium Reasoning"
+    temperature: 1
+    reasoning_effort: medium
 ```
 
 **Key Features:**
@@ -91,7 +83,7 @@ players:
 
 <img src="./media/visualize.png" width=400>
 
-Banana-Bench includes an interactive HTML visualizer that lets you watch games play out turn-by-turn with animations and detailed player insights.
+Banana-Bench includes an interactive HTML visualizer that lets you watch games play out turn-by-turn with animations and player insights.
 
 ### Generating Visualizations
 
