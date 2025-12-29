@@ -520,6 +520,10 @@ class BananaBench(BaseModel):
             )
             self.record_turn(turn_result)
             player.turn_count += 1
+
+            # Check max turns even after errors
+            self.check_max_turns()
+
             return turn_result
         
         # Add assistant response to history
