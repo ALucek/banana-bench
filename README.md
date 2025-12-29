@@ -4,16 +4,17 @@
 
 A benchmark for evaluating Large Language Models through the game of Bananagrams. LLMs must build valid crossword-style boards using structured output formats, demonstrating spatial reasoning, constraint satisfaction, and multi-turn strategic decision-making.
 
-## Features
+### How it Works
 
-- **LLM-Driven Gameplay**: Models play Bananagrams by generating valid board configurations
-- **Structured Validation**: Comprehensive verification system with cascading error feedback
-- **Multi-Provider Support**: Works with any LLM via LiteLLM (OpenAI, Anthropic, etc.)
-- **Detailed Tracking**: Full conversation history, turn-by-turn analysis, and token usage tracking
-- **Smart Error Filtering**: Cascading error system prevents overwhelming models with downstream errors
-- **Visual Feedback**: Rendered grid visualization helps models understand board state
-- **Resume Capability**: Resume interrupted benchmarks from saved state
-- **Result Cleanup**: Clean up error-filled results before resuming
+1. **Setup**: Each LLM receives a starting hand of tiles (21 for 1-4 players)
+2. **Turn Loop**: On each turn:
+   - LLM receives current hand, game state, and feedback from previous turn
+   - LLM generates a board specification
+   - Board is validated against structure rules, grid conflicts, and dictionary
+   - **Auto-PEEL**: If board is valid and uses all tiles, everyone draws one tile
+   - **Auto-BANANAS**: If bunch is empty and board is valid, player wins!
+3. **Actions**: Players can use `DUMP X` to exchange a difficult tile for three new ones
+4. **End**: The first LLM to create a valid board using all their tiles when the bunch is empty wins the game!
 
 ## Setup and Install
 
@@ -33,26 +34,9 @@ uv sync
 
 # Set up your LLM API key (for OpenAI, Anthropic, etc.)
 export OPENAI_API_KEY="your-api-key"
-# or
-export ANTHROPIC_API_KEY="your-api-key"
 ```
 
 ## Usage
-
-### Quick Start
-
-```bash
-# Run a benchmark with the example config
-uv run python -m src.main configs/example.yaml
-
-# Run with verbose output to see the game play out
-uv run python -m src.main configs/example.yaml --verbose
-
-# Save results to a specific location
-uv run python -m src.main configs/example.yaml --output results/my_run.json
-
-
-```
 
 ### Configuration
 
@@ -78,8 +62,22 @@ players:
 - Each player can have different model, temperature, and max_tokens
 - Pass provider-specific kwargs (like Claude's `thinking` parameter)
 - Mix and match any LiteLLM-supported parameters
-- Optional custom names for better result tracking
+- Optional custom names
 - Number of players is automatically determined by the players list
+
+
+### Kick Off
+
+```bash
+# Run a benchmark with the example config
+uv run python -m src.main configs/example.yaml
+
+# Run with verbose output to see the game play out
+uv run python -m src.main configs/example.yaml --verbose
+
+# Save results to a specific location
+uv run python -m src.main configs/example.yaml --output results/my_run.json
+```
 
 ### Resuming Interrupted Runs
 
@@ -116,18 +114,7 @@ uv run python -m src.visualize results/game.json
 uv run python -m src.visualize results/game.json --output my_viz.html
 ```
 
-## How It Works
-
-### Game Flow
-
-1. **Setup**: Each player receives a starting hand of tiles (21 for 1-4 players)
-2. **Turn Loop**: On each turn:
-   - LLM receives current hand, game state, and feedback from previous turn
-   - LLM generates a board specification
-   - Board is validated against structure rules, grid conflicts, and dictionary
-   - **Auto-PEEL**: If board is valid and uses all tiles, everyone draws one tile
-   - **Auto-BANANAS**: If bunch is empty and board is valid, player wins!
-3. **Actions**: Players can use `DUMP X` to exchange a difficult tile for three new ones
+## Extras
 
 ### Validation System
 
@@ -152,7 +139,7 @@ Benchmark results are saved as JSON files containing:
 - Complete conversation history for each player
 - Final game state and outcome
 - Timing information
-- **Token usage tracking**: Per-turn and total token counts (prompt, completion, and total tokens)
+- Per-turn and total token counts (prompt, completion, and total tokens)
 
 ## Acknowledgements
 
