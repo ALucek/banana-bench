@@ -81,7 +81,7 @@ players:
 
 ## Visualization
 
-<img src="./media/visualizer.png" width=400>
+<img src="./media/visualizer.gif" width=600>
 
 Banana-Bench includes an interactive HTML visualizer that lets you watch games play out turn-by-turn with animations and player insights.
 
@@ -141,7 +141,7 @@ Benchmark results are saved as JSON files containing:
 
 ## Acknowledgements
 
-Thanks to [Michael Fogleman](https://github.com/fogleman) for providing the (Scrabble Tournament Word List)[https://github.com/fogleman/TWL06] verification logic and data.
+Thanks to [Michael Fogleman](https://github.com/fogleman) for providing the [Scrabble Tournament Word List](https://github.com/fogleman/TWL06) verification logic and data.
 
 # Contributions
 
