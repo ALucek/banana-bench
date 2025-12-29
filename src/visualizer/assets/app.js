@@ -332,18 +332,8 @@ function renderTurn(turnIndex, animate = true) {
   // Update turn info
   updateTurnInfo(turn, turnIndex);
 
-  // Show action notifications (DUMP, PEEL, BANANAS)
-  if (animate) {
-    showActionNotification(turn);
-  }
-
-  // Check for PEEL flash
-  if (turn.auto_peeled) {
-    document.getElementById('bunch-pile').classList.add('peel-flash');
-    setTimeout(() => {
-      document.getElementById('bunch-pile').classList.remove('peel-flash');
-    }, 600);
-  }
+  // PEEL flash and notification will be shown after animation completes
+  // (moved to renderActivePlayerWithAnimation)
 }
 
 function renderActivePlayerWithAnimation(playerId, turn) {
@@ -390,13 +380,26 @@ function renderActivePlayerWithAnimation(playerId, turn) {
         setTimeout(() => {
           renderValidation(playerId, turn);
 
-          state.isAnimating = false;
+          // Phase 5: After validation, show notification (PEEL/DUMP/BANANAS)
+          setTimeout(() => {
+            showActionNotification(turn);
 
-          // If playing, schedule next turn
-          if (state.isPlaying) {
-            const delay = 1500 / state.playbackSpeed;
-            state.playInterval = setTimeout(() => advanceWithAnimation(), delay);
-          }
+            // PEEL flash on bunch
+            if (turn.auto_peeled) {
+              document.getElementById('bunch-pile').classList.add('peel-flash');
+              setTimeout(() => {
+                document.getElementById('bunch-pile').classList.remove('peel-flash');
+              }, 600);
+            }
+
+            state.isAnimating = false;
+
+            // If playing, schedule next turn
+            if (state.isPlaying) {
+              const delay = 1500 / state.playbackSpeed;
+              state.playInterval = setTimeout(() => advanceWithAnimation(), delay);
+            }
+          }, 200 / state.playbackSpeed);
         }, 400 / state.playbackSpeed);
       }, 300 / state.playbackSpeed);
     }
