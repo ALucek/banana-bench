@@ -70,13 +70,13 @@ players:
 
 ```bash
 # Run a benchmark with the example config
-uv run python -m src.main configs/example.yaml
+uv run python -m src.main example_config.yaml
 
 # Run with verbose output to see the game play out
-uv run python -m src.main configs/example.yaml --verbose
+uv run python -m src.main example_config.yaml --verbose
 
 # Save results to a specific location
-uv run python -m src.main configs/example.yaml --output results/my_run.json
+uv run python -m src.main example_config.yaml --output results/my_run.json
 ```
 
 ### Resuming Interrupted Runs
@@ -85,10 +85,10 @@ If a benchmark is interrupted (API quota limits, crashes, etc.), you can resume 
 
 ```bash
 # Resume from a saved result file
-uv run python -m src.main --resume results/interrupted_run.json --verbose
+uv run python -m src.main --resume interrupted_run.json --verbose
 
 # Resume and save to a specific output file
-uv run python -m src.main --resume results/interrupted_run.json --output results/final_run.json
+uv run python -m src.main --resume interrupted_run.json --output final_run.json
 ```
 
 ## Visualization
@@ -108,10 +108,10 @@ uv run python -m src.main configs/example.yaml --visualize
 **Generate from existing results:**
 ```bash
 # Convert any results JSON to an interactive visualizer
-uv run python -m src.visualize results/game.json
+uv run python -m src.visualize game.json
 
 # Specify custom output location
-uv run python -m src.visualize results/game.json --output my_viz.html
+uv run python -m src.visualize game.json --output my_viz.html
 ```
 
 ## Extras
@@ -153,7 +153,6 @@ Todo List
 - Better validation of various models and providers
 - Ranking and List
 - Organizing codebase
-  - Better model handling for environment
 
 ## License
 

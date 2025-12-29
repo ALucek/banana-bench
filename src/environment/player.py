@@ -6,44 +6,13 @@ to generate moves.
 """
 
 import re
-from typing import List, Dict, Optional, Literal, Any
+from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field, ConfigDict
 
 from .llm_client import LLMClient
+from .models import ParsedResponse
 from ..verifiers.verify import verify
 from ..verifiers.models import ValidationResult
-
-
-Action = Literal["DUMP", "NONE"]
-
-
-class ParsedResponse(BaseModel):
-    """Parsed components from an LLM response."""
-    thinking: Optional[str] = None
-    action: Action = "NONE"
-    dump_tile: Optional[str] = None  # The tile to dump, if action is DUMP
-    board: Optional[str] = None  # Raw board XML content
-    raw_response: str = ""
-
-
-class TurnResult(BaseModel):
-    """Result of a single player turn."""
-    player_id: str
-    turn_number: int
-    action: Action
-    dump_tile: Optional[str] = None
-    board_spec: Optional[str] = None
-    validation: Optional[ValidationResult] = None
-    thinking: Optional[str] = None
-    tiles_before: List[str] = Field(default_factory=list)
-    tiles_after: List[str] = Field(default_factory=list)
-    raw_response: str = ""
-    error: Optional[str] = None
-    auto_peeled: bool = False
-    auto_bananas: bool = False
-    prompt_tokens: Optional[int] = None
-    completion_tokens: Optional[int] = None
-    total_tokens: Optional[int] = None
 
 
 class Player(BaseModel):

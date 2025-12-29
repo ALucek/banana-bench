@@ -5,50 +5,10 @@ from typing import List, Dict, Optional, Any, Callable
 from pydantic import BaseModel, Field, ConfigDict
 
 from .game import Game
-from .player import Player, TurnResult, Action
+from .player import Player
+from .models import Action, TurnResult, BenchmarkConfig, BenchmarkResult
 from .prompts import SYSTEM_PROMPT, build_player_prompt
 from ..verifiers.models import ValidationError
-
-
-class PlayerConfig(BaseModel):
-    """Configuration for a single player."""
-    model_config = ConfigDict(extra='allow')
-
-    model: str
-    name: Optional[str] = None
-    temperature: float = 1.0
-    max_tokens: Optional[int] = None
-    # Additional kwargs are allowed and passed to LiteLLM
-
-
-class BenchmarkConfig(BaseModel):
-    """Configuration for a benchmark run."""
-    max_turns: int = 100
-    seed: Optional[int] = None
-    players: List[PlayerConfig] = Field(default_factory=lambda: [PlayerConfig(model="gpt-4o")])
-
-    @property
-    def num_players(self) -> int:
-        """Number of players (automatically derived from players list)."""
-        return len(self.players)
-
-
-class BenchmarkResult(BaseModel):
-    """Result of a complete benchmark run."""
-    config: BenchmarkConfig
-    winner: Optional[str] = None
-    total_turns: int = 0
-    end_reason: str = ""
-    player_results: Dict[str, Dict] = Field(default_factory=dict)
-    turn_history: List[TurnResult] = Field(default_factory=list)
-    game_state: Dict = Field(default_factory=dict)
-    conversation_history: Dict[str, List[Dict[str, str]]] = Field(default_factory=dict)
-    started_at: str = ""
-    ended_at: str = ""
-    duration_seconds: float = 0.0
-    total_prompt_tokens: int = 0
-    total_completion_tokens: int = 0
-    total_tokens: int = 0
 
 
 class BananaBench(BaseModel):
