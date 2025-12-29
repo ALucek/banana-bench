@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeTable();
   initializeTimeline();
   initializeControls();
+  initializeNotification();
 
   // Show initial state (turn 0)
   renderTurn(0);
@@ -104,11 +105,13 @@ function initializeTimeline() {
     marker.setAttribute('data-turn', index);
     marker.setAttribute('data-player', turn.player_id);
 
-    // Color based on turn outcome
+    // Color based on turn outcome (priority order matters)
     if (turn.auto_bananas) {
       marker.classList.add('win');
     } else if (turn.auto_peeled) {
       marker.classList.add('peel');
+    } else if (turn.action === 'DUMP') {
+      marker.classList.add('dump');
     } else if (turn.validation && turn.validation.valid) {
       marker.classList.add('valid');
     } else {
@@ -126,6 +129,14 @@ function initializeTimeline() {
 
   // Update total turns display
   document.getElementById('total-turns').textContent = turns.length;
+}
+
+function initializeNotification() {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = 'action-notification';
+  notification.id = 'action-notification';
+  document.body.appendChild(notification);
 }
 
 function setupTimelineDrag() {
@@ -308,6 +319,11 @@ function renderTurn(turnIndex, animate = true) {
 
   // Update turn info
   updateTurnInfo(turn, turnIndex);
+
+  // Show action notifications (DUMP, PEEL, BANANAS)
+  if (animate) {
+    showActionNotification(turn);
+  }
 
   // Check for PEEL flash
   if (turn.auto_peeled) {
@@ -701,6 +717,57 @@ function updateTimelineHandle() {
     : 0;
 
   handle.style.left = `calc(${percent}% + 6px)`;
+}
+
+// ============================================
+// Action Notifications
+// ============================================
+
+function showActionNotification(turn) {
+  const notification = document.getElementById('action-notification');
+  if (!notification) return;
+
+  let message = '';
+  let type = '';
+
+  // Get player name
+  const playerIndex = parseInt(turn.player_id.substring(1)) - 1;
+  const playerConfig = state.gameData.config.players[playerIndex];
+  const playerName = playerConfig.name || playerConfig.model;
+
+  // Determine notification type and message
+  if (turn.auto_bananas) {
+    type = 'bananas';
+    message = `<span class="notification-icon">🏆</span> <span class="player-name-notification">${playerName}</span> BANANAS!`;
+  } else if (turn.auto_peeled) {
+    type = 'peel';
+    message = `<span class="notification-icon">🍌</span> <span class="player-name-notification">${playerName}</span> PEEL!`;
+  } else if (turn.action === 'DUMP') {
+    type = 'dump';
+    const dumpedTile = turn.dump_tile || '?';
+    message = `<span class="notification-icon">🗑️</span> <span class="player-name-notification">${playerName}</span> DUMP <span class="dump-tile">${dumpedTile}</span>`;
+  }
+
+  // Only show if there's a message
+  if (message) {
+    // Remove existing classes
+    notification.className = 'action-notification';
+
+    // Set new content and type
+    notification.innerHTML = message;
+    notification.classList.add(type);
+    notification.setAttribute('data-player', turn.player_id);
+
+    // Trigger animation
+    setTimeout(() => {
+      notification.classList.add('visible');
+    }, 10);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      notification.classList.remove('visible');
+    }, 2400 / state.playbackSpeed);
+  }
 }
 
 // ============================================

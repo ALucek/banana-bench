@@ -144,32 +144,6 @@ The verifier checks boards through multiple stages:
 - Structural errors hide grid conflicts and accidental words
 - Errors limited to 5 maximum with actionable tips
 
-## Development
-
-### Running Tests
-
-```bash
-# Run all tests
-uv run pytest tests/ -v
-
-# Run specific test suite
-uv run pytest tests/test_verify.py -v
-uv run pytest tests/test_cascade.py -v
-
-# Run with coverage
-uv run pytest tests/ -v --cov=src
-```
-
-### Code Quality
-
-```bash
-# Run linter
-uv run ruff check src/ tests/
-
-# Format code
-uv run ruff format src/ tests/
-```
-
 ## Results
 
 Benchmark results are saved as JSON files containing:
@@ -195,7 +169,7 @@ Example result structure:
 
 ## License
 
-[MIT License][LICENSE]
+[MIT License](LICENSE)
 
 ## Acknowledgements
 
