@@ -98,6 +98,20 @@ function initializeTimeline() {
   const track = document.getElementById('timeline-track');
   const turns = state.gameData.turn_history;
 
+  // Calculate adaptive marker width based on turn count
+  // Aim to fit all markers in the available space
+  const trackWidth = track.offsetWidth - 40; // Account for padding
+  const gap = 1; // Gap between markers
+  const totalGaps = (turns.length - 1) * gap;
+  const availableWidth = trackWidth - totalGaps;
+  const calculatedWidth = availableWidth / turns.length;
+
+  // Constrain between min (2px) and max (12px) for usability
+  const markerWidth = Math.max(2, Math.min(12, calculatedWidth));
+
+  // Apply the calculated width to all markers via CSS variable
+  track.style.setProperty('--marker-width', `${markerWidth}px`);
+
   // Create markers for each turn
   turns.forEach((turn, index) => {
     const marker = document.createElement('div');
