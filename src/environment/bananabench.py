@@ -46,6 +46,9 @@ class BenchmarkResult(BaseModel):
     started_at: str = ""
     ended_at: str = ""
     duration_seconds: float = 0.0
+    total_prompt_tokens: int = 0
+    total_completion_tokens: int = 0
+    total_tokens: int = 0
 
 
 class BananaBench(BaseModel):
@@ -238,19 +241,32 @@ class BananaBench(BaseModel):
     def get_result(self) -> BenchmarkResult:
         """
         Get the final benchmark result.
-        
+
         Returns:
             BenchmarkResult containing full run data
         """
         ended_at = datetime.now()
         duration = (ended_at - self.started_at).total_seconds() if self.started_at else 0.0
-        
+
         # Collect conversation history from all players
         conversation_history = {}
         for player in self.players:
             if player.llm_client:
                 conversation_history[player.player_id] = player.llm_client.get_messages()
-        
+
+        # Calculate total token usage across all turns
+        total_prompt_tokens = 0
+        total_completion_tokens = 0
+        total_tokens = 0
+
+        for turn in self.turn_history:
+            if turn.prompt_tokens:
+                total_prompt_tokens += turn.prompt_tokens
+            if turn.completion_tokens:
+                total_completion_tokens += turn.completion_tokens
+            if turn.total_tokens:
+                total_tokens += turn.total_tokens
+
         return BenchmarkResult(
             config=self.config,
             winner=self.winner,
@@ -263,6 +279,9 @@ class BananaBench(BaseModel):
             started_at=self.started_at.isoformat() if self.started_at else "",
             ended_at=ended_at.isoformat(),
             duration_seconds=duration,
+            total_prompt_tokens=total_prompt_tokens,
+            total_completion_tokens=total_completion_tokens,
+            total_tokens=total_tokens,
         )
     
     def save_result(self, path: str | Path) -> None:
@@ -360,10 +379,22 @@ class BananaBench(BaseModel):
         try:
             response = player.llm_client.completion()
             raw_response = response.choices[0].message.content or ""
+
+            # Extract token usage
+            prompt_tokens = None
+            completion_tokens = None
+            total_tokens = None
+            if hasattr(response, 'usage') and response.usage:
+                prompt_tokens = getattr(response.usage, 'prompt_tokens', None)
+                completion_tokens = getattr(response.usage, 'completion_tokens', None)
+                total_tokens = getattr(response.usage, 'total_tokens', None)
         except Exception as e:
             # Handle LLM errors gracefully
             raw_response = ""
             error = f"LLM error: {str(e)}"
+            prompt_tokens = None
+            completion_tokens = None
+            total_tokens = None
             turn_result = TurnResult(
                 player_id=player.player_id,
                 turn_number=turn_number,
@@ -372,6 +403,9 @@ class BananaBench(BaseModel):
                 tiles_after=player.hand.copy(),
                 raw_response=raw_response,
                 error=error,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                total_tokens=total_tokens,
             )
             self.record_turn(turn_result)
             player.turn_count += 1
@@ -459,6 +493,9 @@ class BananaBench(BaseModel):
             error=action_error,
             auto_peeled=auto_peeled,
             auto_bananas=auto_bananas,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
         )
         
         self.record_turn(turn_result)

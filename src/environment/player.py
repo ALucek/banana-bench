@@ -41,6 +41,9 @@ class TurnResult(BaseModel):
     error: Optional[str] = None
     auto_peeled: bool = False
     auto_bananas: bool = False
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
 
 
 class Player(BaseModel):

@@ -139,25 +139,18 @@ Benchmark results are saved as JSON files containing:
 - Final game state and outcome
 - Timing information
 
-Example result structure:
-```json
-{
-  "config": {...},
-  "winner": "p1",
-  "total_turns": 42,
-  "end_reason": "Player 1 (gpt-4o) called BANANAS with valid board",
-  "player_results": {...},
-  "turn_history": [...],
-  "conversation_history": {...},
-  "duration_seconds": 127.3
-}
-```
-
-## License
-
-[MIT License](LICENSE)
-
 ## Acknowledgements
 
 Thanks to [Michael Fogleman](https://github.com/fogleman) for providing the (Scrabble Tournament Word List)[https://github.com/fogleman/TWL06] verification logic and data.
 
+# Contributions
+
+Contributions welcome! Feel free to submit an issue or documented PR.
+
+Todo List
+- Better validation of various models and providers
+- Ranking and List
+
+## License
+
+[MIT License](LICENSE)
