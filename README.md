@@ -150,6 +150,8 @@ Contributions welcome! Feel free to submit an issue or documented PR.
 Todo List
 - Better validation of various models and providers
 - Ranking and List
+- Organizing codebase
+  - Better model handling for environment
 
 ## License
 
