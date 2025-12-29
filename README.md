@@ -81,7 +81,7 @@ players:
 
 ## Visualization
 
-<img src="./media/visualize.png" width=400>
+<img src="./media/visualizer.png" width=400>
 
 Banana-Bench includes an interactive HTML visualizer that lets you watch games play out turn-by-turn with animations and player insights.
 
@@ -101,14 +101,6 @@ uv run python -m src.visualize results/game.json
 # Specify custom output location
 uv run python -m src.visualize results/game.json --output my_viz.html
 ```
-
-**Open in browser:**
-```bash
-# The visualizer is a self-contained HTML file
-open results/game.html
-```
-
-The visualizer is completely self-contained - all data, styling, and scripts are embedded in a single HTML file that works offline and can be easily shared.
 
 ## How It Works
 
