@@ -38,6 +38,8 @@ export OPENAI_API_KEY="your-api-key"
 
 ## Usage
 
+_To see a full configuration, run output, and visualization, see the [/example](/example) directory._
+
 ### Configuration
 
 Create a YAML config file to customize your benchmark:
