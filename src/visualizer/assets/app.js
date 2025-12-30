@@ -100,7 +100,8 @@ function initializeTimeline() {
 
   // Calculate adaptive marker width based on turn count
   // Aim to fit all markers in the available space
-  const trackWidth = track.offsetWidth - 40; // Account for padding
+  const padding = 12; // 6px on each side
+  const trackWidth = track.offsetWidth - padding;
   const gap = 1; // Gap between markers
   const totalGaps = (turns.length - 1) * gap;
   const availableWidth = trackWidth - totalGaps;
@@ -160,9 +161,24 @@ function setupTimelineDrag() {
 
   const updateFromPosition = (e) => {
     if (state.isAnimating) return;
+
+    // Get the actual marker area bounds
+    const markers = track.querySelectorAll('.timeline-marker');
+    if (markers.length === 0) return;
+
+    const firstMarker = markers[0];
+    const lastMarker = markers[markers.length - 1];
+
+    const markerAreaStart = firstMarker.offsetLeft + (firstMarker.offsetWidth / 2);
+    const markerAreaEnd = lastMarker.offsetLeft + (lastMarker.offsetWidth / 2);
+    const markerAreaWidth = markerAreaEnd - markerAreaStart;
+
+    // Calculate position relative to the marker area
     const rect = track.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const percent = x / rect.width;
+    const clickX = e.clientX - rect.left;
+    const relativeX = Math.max(0, Math.min(clickX - markerAreaStart, markerAreaWidth));
+    const percent = relativeX / markerAreaWidth;
+
     const turnIndex = Math.round(percent * (state.gameData.turn_history.length - 1));
     goToTurn(turnIndex, false);  // Skip animation when scrubbing
   };
@@ -844,12 +860,30 @@ function updateTurnInfo(turn, turnIndex) {
 
 function updateTimelineHandle() {
   const handle = document.getElementById('timeline-handle');
+  const track = document.getElementById('timeline-track');
   const totalTurns = state.gameData.turn_history.length;
+
+  if (totalTurns === 0) return;
+
   const percent = totalTurns > 1
-    ? (state.currentTurn / (totalTurns - 1)) * 100
+    ? state.currentTurn / (totalTurns - 1)
     : 0;
 
-  handle.style.left = `calc(${percent}% + 6px)`;
+  // Get the actual marker positions to align the handle correctly
+  const markers = track.querySelectorAll('.timeline-marker');
+  if (markers.length === 0) return;
+
+  const firstMarker = markers[0];
+  const lastMarker = markers[markers.length - 1];
+
+  // Calculate the actual start and end of the marker area
+  const markerAreaStart = firstMarker.offsetLeft + (firstMarker.offsetWidth / 2);
+  const markerAreaEnd = lastMarker.offsetLeft + (lastMarker.offsetWidth / 2);
+  const markerAreaWidth = markerAreaEnd - markerAreaStart;
+
+  // Position handle within the actual marker area
+  const position = markerAreaStart + (markerAreaWidth * percent);
+  handle.style.left = `${position}px`;
 }
 
 // ============================================

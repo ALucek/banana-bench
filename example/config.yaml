@@ -1,0 +1,25 @@
+max_turns: 500
+seed: 13
+
+players:
+
+  - model: gpt-5.2-2025-12-11
+    name: "P1: GPT-5.2 - High Reasoning"
+    temperature: 1
+    reasoning_effort: high
+  
+  - model: gpt-5.2-2025-12-11
+    name: "P2: GPT-5.2 - Medium Reasoning"
+    temperature: 1
+    reasoning_effort: medium
+  
+  - model: gpt-5.2-2025-12-11
+    name: "P3: GPT-5.2 - Low Reasoning"
+    temperature: 1
+    reasoning_effort: low
+  
+  - model: gpt-5.2-2025-12-11
+    name: "P4: GPT-5.2 - No Reasoning"
+    temperature: 1
+
+num_players: 4
